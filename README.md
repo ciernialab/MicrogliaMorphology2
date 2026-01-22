@@ -105,14 +105,6 @@ hundreds to thousands of individual microglia cells.
 
 
 
-### Create the following subdirectories in a single directory for your project where you would like to save your images and analysis output, and include one representative test image (e.g., ‘Test-Iba1’):
-
-
-
-![](./images/Example_DatasetDirectory.png)
-
-
-
 ### Some notes about MicrogliaMorphology
 
 
@@ -510,6 +502,7 @@ If you are running individual images: After you finish running
 ColorByCluster on your image and saved your final outputs, make sure to
 
 **close all ImageJ windows** before proceeding to the next image!
+
 
 
 
