@@ -133,7 +133,7 @@ function cellROI(input, output, filename, min, max){
 					run("Clear Outside");
 	    			Overlay.remove;
 	    			
-	    			analyze(label_temp);
+	    			analyze(label_temp, filename);
 	    			
 					print(label_temp);
 					print(i + "/" + area.length);
@@ -158,7 +158,7 @@ function cellROI(input, output, filename, min, max){
 
 
 // Skeletonize/AnalyzeSkeleton
-function analyze(name) {
+function analyze(name, image) {
 	setThreshold(1, 255);
 	
 	run("To Selection");
@@ -177,6 +177,8 @@ function analyze(name) {
 	
 	close("Results");
 	selectWindow("All_results");//store cell results in second table
+	
+	Table.set("Image", result_row_number, image);
 	
 	result_row_number = Table.size;
 	
