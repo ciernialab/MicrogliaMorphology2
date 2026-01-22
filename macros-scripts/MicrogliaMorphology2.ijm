@@ -560,7 +560,7 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 		endAt=Dialog.getNumber();
 		roichoice=Dialog.getCheckbox();
 		
-		//setBatchMode(true);
+		setBatchMode(true);
 		
 			
 		if(auto_or_autolocal == "Auto thresholding"){
@@ -613,7 +613,7 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 		
 		skipped_files = Array.deleteValue(skipped_files, " ");
 		
-		//setBatchMode(false);
+		setBatchMode(false);
 		
 		
 	    print("Finished analysing cells. The following files were skipped: " + String.join(skipped_files, " "));
