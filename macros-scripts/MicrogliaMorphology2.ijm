@@ -346,6 +346,8 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 		
 		Dialog.addCheckbox("Use test image to find Microglia areas?", true);
 		Dialog.addCheckbox("Create output folders automatically?", false);
+		Dialog.addCheckbox("Is your input already binarized (thresholded)?", false);
+		
 		Dialog.show();
 		
 		auto_or_autolocal = Dialog.getChoice();
@@ -355,8 +357,9 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 		roichoicetest=Dialog.getCheckbox();
 		use_test_image = Dialog.getCheckbox();
 		use_directory_creation = Dialog.getCheckbox();
+		skip_thresholding = Dialog.getCheckbox();
 		
-
+		
 // STEP 1b. Determining single cell area range using test image
 		if (use_test_image == true) {
 			//use file browser to choose test image
@@ -463,145 +466,182 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 			area_max = Dialog.getNumber();
 		}
 	    
-	    //get file input directory here to be able to compare with the test image directory
-		subregion_dir = getDirectory("Choose folder containing original input images");
-		parent_directory = File.getDirectory(subregion_dir);
-		subregion_input = getFileList(subregion_dir);
-		subregion_input = Array.sort(subregion_input);
-		autocount=subregion_input.length;
-		
-		if (use_test_image == false) {
-			path = subregion_dir;
-		}
-		
-	    // conditional printing for saving final parameters
-		if(auto_or_autolocal == "Auto thresholding"){
-			finalprint = auto_method;
-		}
-		if(auto_or_autolocal == "Auto local thresholding"){
-			finalprint = autolocal_method + ", radius = " + autolocal_radius;
-		}
-
-	    
-				
-// Progress message: print summary statement of parameters
-		Dialog.create("MicrogliaMorphology");
-		Dialog.addMessage("Here is a summary of your dataset-specific parameters that will be applied in MicrogliaMorphology");
-		Dialog.addMessage("AUTO THRESHOLDING OR AUTO LOCAL THRESHOLDING?");
-		Dialog.addMessage(auto_or_autolocal);
-		
-		if(auto_or_autolocal == "Auto thresholding"){
-			Dialog.addMessage("METHOD:");
-			Dialog.addMessage(auto_method);
-		}
-		
-		if(auto_or_autolocal == "Auto local thresholding"){
-			Dialog.addMessage("METHOD:");
-			Dialog.addMessage(autolocal_method);
-			Dialog.addMessage("RADIUS:");
-			Dialog.addMessage(autolocal_radius);
+	    //everything to do with thresholding and microscopy input choice can be skipped
+	    if (skip_thresholding == false) {
+		    //get file input directory here to be able to compare with the test image directory
+			subregion_dir = getDirectory("Choose folder containing original input images");
+			parent_directory = File.getDirectory(subregion_dir);
+			subregion_input = getFileList(subregion_dir);
+			subregion_input = Array.sort(subregion_input);
+			autocount=subregion_input.length;
+			
+			if (use_test_image == false) {
+				path = subregion_dir;
 			}
-		
-		Dialog.addMessage("LOWER CELL AREA FILTER:");
-		Dialog.addMessage(area_min);
-		Dialog.addMessage("UPPER CELL AREA FILTER:");
-		Dialog.addMessage(area_max);
-		Dialog.addMessage("Now we will proceed with thresholding your images!");
-		Dialog.show();
-		
-// STEP 2. Thresholding
-
-//use file browser to choose path and files to run plugin on
-		
-		
-		if (use_directory_creation) {
-			//create directory tree
-			thresholded_dir = parent_directory + "/ThresholdedImages/";
-			data_output=parent_directory + "/MeasurementResults/";
-			File.makeDirectory(thresholded_dir);
-			File.makeDirectory(data_output);
-		} else {
-			thresholded_dir=getDirectory("Choose output folder to write thresholded images to");
 			
-			data_output=getDirectory("Choose output folder to write measurement results to");
-			
-		}
+		    // conditional printing for saving final parameters
+			if(auto_or_autolocal == "Auto thresholding"){
+				finalprint = auto_method;
+			}
+			if(auto_or_autolocal == "Auto local thresholding"){
+				finalprint = autolocal_method + ", radius = " + autolocal_radius;
+			}
 	
-		//save parameter files in parent of output, in case of input being read-only
-		output_parent=File.getParent(thresholded_dir);
-		f = File.open(output_parent + "/FinalDatasetParameters.txt");
-		if (use_test_image) {
-			print(f, auto_or_autolocal + " \n" + 
-		    	"Thresholding method = " + finalprint + " \n" +
-		    	"Lower cell area filter = " + area_min + " \n" + 
-		    	"Upper cell area filter = " + area_max + " \n" + 
-		    	"Setup ran on image=" + path);
-		} else {
-			print(f, auto_or_autolocal + " \n" + 
-	    		 "Thresholding method = " + finalprint + " \n" +
-	    		 "Lower cell area filter = " + area_min + " \n" + 
-	    		 "Upper cell area filter = " + area_max);
-		}
-	    File.close(f);
-		
-
-		//dialog box
-		Dialog.create("MicrogliaMorphology");
-		Dialog.addMessage("Processing files from directory:");
-		parentname=split(subregion_dir,"/");
-		Dialog.addMessage(parentname[(parentname.length)-1]);
-		Dialog.addMessage("which has this many images:");
-		Dialog.addMessage(autocount);
-		Dialog.addMessage("Select range of images you'd like to analyze");
-		Dialog.addNumber("Start at Image:", 1);
-		Dialog.addNumber("Stop at Image:", 1);
-		Dialog.addCheckbox("Do your input images have ROIs traced?", true);
-		Dialog.show();
-				
-		startAt=Dialog.getNumber();
-		endAt=Dialog.getNumber();
-		roichoice=Dialog.getCheckbox();
-		
-		setBatchMode(true);
-		
+		    
+					
+	// Progress message: print summary statement of parameters
+			Dialog.create("MicrogliaMorphology");
+			Dialog.addMessage("Here is a summary of your dataset-specific parameters that will be applied in MicrogliaMorphology");
+			Dialog.addMessage("AUTO THRESHOLDING OR AUTO LOCAL THRESHOLDING?");
+			Dialog.addMessage(auto_or_autolocal);
 			
-		if(auto_or_autolocal == "Auto thresholding"){
-			
-			for (i=(startAt-1); i<(endAt); i++){
-			
-				if (use_batchmode) {
-					print("Thresholding in progress, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
-				} 
-				thresholding(subregion_dir, thresholded_dir, subregion_input[i]);
-				}
-		}
-		
-		if(auto_or_autolocal == "Auto local thresholding"){
-		
-			for (i=(startAt-1); i<(endAt); i++){
-			
-				print("Thresholding in progress, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
-				
-				local_thresholding(subregion_dir, thresholded_dir, subregion_input[i]);
+			if(auto_or_autolocal == "Auto thresholding"){
+				Dialog.addMessage("METHOD:");
+				Dialog.addMessage(auto_method);
 			}
-		}
+			
+			if(auto_or_autolocal == "Auto local thresholding"){
+				Dialog.addMessage("METHOD:");
+				Dialog.addMessage(autolocal_method);
+				Dialog.addMessage("RADIUS:");
+				Dialog.addMessage(autolocal_radius);
+				}
+			
+			Dialog.addMessage("LOWER CELL AREA FILTER:");
+			Dialog.addMessage(area_min);
+			Dialog.addMessage("UPPER CELL AREA FILTER:");
+			Dialog.addMessage(area_max);
+			Dialog.addMessage("Now we will proceed with thresholding your images!");
+			Dialog.show();
+			
+	// STEP 2. Thresholding
+	
+	//use file browser to choose path and files to run plugin on
+			
+			
+			if (use_directory_creation) {
+				//create directory tree
+				thresholded_dir = parent_directory + "/ThresholdedImages/";
+				data_output=parent_directory + "/MeasurementResults/";
+				File.makeDirectory(thresholded_dir);
+				File.makeDirectory(data_output);
+			} else {
+				thresholded_dir=getDirectory("Choose output folder to write thresholded images to");
+				
+				data_output=getDirectory("Choose output folder to write measurement results to");
+				
+			}
 		
-		
-		// SAVE AREA MEASURES
-		saveAs("Results", output_parent + "/Areas.csv");
-		close("Results");
-		
-		print("Thresholding finished");
-		
+			//save parameter files in parent of output, in case of input being read-only
+			output_parent=File.getParent(thresholded_dir);
+			f = File.open(output_parent + "/FinalDatasetParameters.txt");
+			if (use_test_image) {
+				print(f, auto_or_autolocal + " \n" + 
+			    	"Thresholding method = " + finalprint + " \n" +
+			    	"Lower cell area filter = " + area_min + " \n" + 
+			    	"Upper cell area filter = " + area_max + " \n" + 
+			    	"Setup ran on image=" + path);
+			} else {
+				print(f, auto_or_autolocal + " \n" + 
+		    		 "Thresholding method = " + finalprint + " \n" +
+		    		 "Lower cell area filter = " + area_min + " \n" + 
+		    		 "Upper cell area filter = " + area_max);
+			}
+		    File.close(f);
+			
+	
+			//dialog box
+			Dialog.create("MicrogliaMorphology");
+			Dialog.addMessage("Processing files from directory:");
+			parentname=split(subregion_dir,"/");
+			Dialog.addMessage(parentname[(parentname.length)-1]);
+			Dialog.addMessage("which has this many images:");
+			Dialog.addMessage(autocount);
+			Dialog.addMessage("Select range of images you'd like to analyze");
+			Dialog.addNumber("Start at Image:", 1);
+			Dialog.addNumber("Stop at Image:", 1);
+			Dialog.addCheckbox("Do your input images have ROIs traced?", true);
+			Dialog.show();
+					
+			startAt=Dialog.getNumber();
+			endAt=Dialog.getNumber();
+			roichoice=Dialog.getCheckbox();
+			
+			setBatchMode(true);
+			
+				
+			if(auto_or_autolocal == "Auto thresholding"){
+				
+				for (i=(startAt-1); i<(endAt); i++){
+				
+					if (use_batchmode) {
+						print("Thresholding in progress, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
+					} 
+					thresholding(subregion_dir, thresholded_dir, subregion_input[i]);
+					}
+			}
+			
+			if(auto_or_autolocal == "Auto local thresholding"){
+			
+				for (i=(startAt-1); i<(endAt); i++){
+				
+					print("Thresholding in progress, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
+					
+					local_thresholding(subregion_dir, thresholded_dir, subregion_input[i]);
+				}
+			}
+			
+			
+			// SAVE AREA MEASURES
+			saveAs("Results", output_parent + "/Areas.csv");
+			close("Results");
+			
+			print("Thresholding finished");
+			
+			thresholded_input = getFileList(thresholded_dir);
+			thresholded_input=Array.sort(thresholded_input);
+			
+			
+			//use all thresholded images
+			startAt = 1;
+			endAt = thresholded_input.length;
+			
 
-		thresholded_input = getFileList(thresholded_dir);
-		thresholded_input=Array.sort(thresholded_input);
-		
-		
-		//use all thresholded images
-		startAt = 1;
-		endAt = thresholded_input.length;
-		
+	    } //this is all skipped, if thresholding is skipped
+	    if (skip_thresholding == true) {
+	    	thresholded_dir = getDirectory("Choose input folder of thresholded images");
+	    	
+			thresholded_input = getFileList(thresholded_dir);
+			thresholded_input=Array.sort(thresholded_input);
+	    	//dialog box
+			Dialog.create("MicrogliaMorphology");
+			Dialog.addMessage("Processing files from directory:");
+			parentname=split(thresholded_dir,"/");
+			Dialog.addMessage(parentname[(parentname.length)-1]);
+			Dialog.addMessage("which has this many images:");
+			Dialog.addMessage(thresholded_input.length);
+			Dialog.addMessage("Select range of images you'd like to analyze");
+			Dialog.addNumber("Start at Image:", 1);
+			Dialog.addNumber("Stop at Image:", thresholded_input.length);
+			Dialog.show();
+					
+			startAt=Dialog.getNumber();
+			endAt=Dialog.getNumber();
+			
+
+	    	if (use_directory_creation) {
+				
+				data_output = File.getParent(thresholded_dir) + "/MeasurementResults/";
+				File.makeDirectory(data_output);
+			} else {
+				
+				data_output=getDirectory("Choose output folder to write measurement results to");
+				
+			}
+
+
+	    }
+
 		
 		skipped_files = newArray();
 		for (i=(startAt-1); i<(endAt); i++){
