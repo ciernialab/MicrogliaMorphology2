@@ -178,9 +178,10 @@ function analyze(name, image) {
 	close("Results");
 	selectWindow("All_results");//store cell results in second table
 	
+	result_row_number = Table.size;
+	
 	Table.set("Image", result_row_number, image);
 	
-	result_row_number = Table.size;
 	
 	for (i = 0; i < cell_headings.length; i++) {
 		Table.set(cell_headings[i], result_row_number, cell_results[i]);
@@ -638,7 +639,8 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 				data_output=getDirectory("Choose output folder to write measurement results to");
 				
 			}
-
+			
+			setBatchMode(true);
 
 	    }
 
