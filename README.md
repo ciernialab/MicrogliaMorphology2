@@ -5,8 +5,8 @@
 
 #### *An updated version of the ImageJ macro for microglia morphology analysis*
 
-This is a modified version of [MicrogliaMorphology](https://github.com/ciernialab/MicrogliaMorphology) that works better with big datasets, that crashed the original pipeline under certain circumstances. The output measurements are slightly different, so if you want to replicate the original data, please refer to the original github
-The FracLac
+This is a modified version of [MicrogliaMorphology](https://github.com/ciernialab/MicrogliaMorphology) that works better with big datasets, that crashed the original pipeline under certain circumstances. The output measurements are slightly different, so if you want to replicate the original data, please refer to the original github. 
+The former FracLac analysis had a memory leak, leading to issues when analyzing more than circa 20000 cells. Now we are not using FracLac anymore, and not creating individual image files for every cell, leading to a decreased file load. 
 
 
 
@@ -272,6 +272,7 @@ ColorByCluster allows you to color the microglia cells in the original immunoflu
 
 
 If you are running individual images: After you finish running ColorByCluster on your image and saved your final outputs, make sure to **close all ImageJ windows** before proceeding to the next image!
+
 
 
 
