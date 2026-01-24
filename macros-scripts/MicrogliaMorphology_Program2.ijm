@@ -108,11 +108,11 @@ function cellROI(input, output, filename, min, max){
 		dirCropOutput=output;
 		
 	    Overlay.remove;
+	    run("Select None");
 		run("Set Measurements...", "area display redirect=None decimal=3");
 		
 		run("Analyze Particles...", "pixel add");
 		roiManager("Measure");	
-		roiManager("Show All");
 		
 		if (nResults > 0) {
 			selectWindow("Results");
@@ -125,10 +125,12 @@ function cellROI(input, output, filename, min, max){
 			for (i = 0; i < area.length; i++) {
 		
 				if((min < area[i]) && (area[i] < max)){
+					selectWindow(mainTitle);
 					label_temp = label[i];
 					label_temp = label_temp.replace(':','_');
 					roiManager("Select", i);
 					run("Duplicate...", "title=" + label_temp);
+					
 					setBackgroundColor(0, 0, 0);
 					run("Clear Outside");
 	    			Overlay.remove;
@@ -138,7 +140,9 @@ function cellROI(input, output, filename, min, max){
 					print(label_temp);
 					print(i + "/" + area.length);
 					close(label_temp);
+					
 				}
+				
 			}
 			close(filename);
 			roiManager("reset");
@@ -146,7 +150,7 @@ function cellROI(input, output, filename, min, max){
 			saveAs("results", output + mainTitle + ".csv");
 			close(mainTitle + ".csv");
 			close("All_results");
-			
+			exit
 			return " ";
 		} else {
 			close(filename);
