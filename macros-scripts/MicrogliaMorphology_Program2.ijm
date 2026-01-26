@@ -150,7 +150,6 @@ function cellROI(input, output, filename, min, max){
 			saveAs("results", output + mainTitle + ".csv");
 			close(mainTitle + ".csv");
 			close("All_results");
-			exit
 			return " ";
 		} else {
 			close(filename);
@@ -617,7 +616,7 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 	    	thresholded_dir = getDirectory("Choose input folder of thresholded images");
 	    	
 			thresholded_input = getFileList(thresholded_dir);
-			thresholded_input=Array.sort(thresholded_input);
+			thresholded_input = Array.sort(thresholded_input);
 	    	//dialog box
 			Dialog.create("MicrogliaMorphology");
 			Dialog.addMessage("Processing files from directory:");
