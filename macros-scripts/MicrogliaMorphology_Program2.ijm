@@ -107,6 +107,10 @@ function cellROI(input, output, filename, min, max){
     	mainTitle=getTitle();
 		dirCropOutput=output;
 		
+		//spaces in the imagename break the skeleton analysis
+		mainTitle_safe = mainTitle.replace(" ", "_");
+		rename(mainTitle_safe);
+		
 	    Overlay.remove;
 	    run("Select None");
 		run("Set Measurements...", "area display redirect=None decimal=3");
@@ -125,7 +129,7 @@ function cellROI(input, output, filename, min, max){
 			for (i = 0; i < area.length; i++) {
 		
 				if((min < area[i]) && (area[i] < max)){
-					selectWindow(mainTitle);
+					selectWindow(mainTitle_safe);
 					label_temp = label[i];
 					label_temp = label_temp.replace(':','_');
 					roiManager("Select", i);
@@ -144,7 +148,7 @@ function cellROI(input, output, filename, min, max){
 				}
 				
 			}
-			close(filename);
+			close(mainTitle_safe);
 			roiManager("reset");
 			selectWindow("All_results");
 			saveAs("results", output + mainTitle + ".csv");
