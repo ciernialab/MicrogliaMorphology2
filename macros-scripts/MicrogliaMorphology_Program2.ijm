@@ -8,17 +8,24 @@
 function thresholding(input, output, filename) {
 		print(input + filename);
 		open(input + filename);
-		//if only one region is marked, that is not usually in the form of an overlay. Add to overlay, as long as there is a selection
-		if (roichoice) {
-			if (Overlay.size < 1) {
-				if (selectionType() != -1) {
-					Overlay.add;
-				}
-			} 
-		}
+		
 		// MEASURE AREA
 		run("Set Measurements...", "area display redirect=None decimal=9");
+		//if there currently is a selection, deselect it for the area measurement (store it in ROI Manager) and select it again, after the entire image is measured
+		has_selection = false;
+		if (selectionType() != -1) {
+			has_selection = true;
+			roiManager("add");
+			run("Select None");
+			
+		}
+		//measure the size of the image
 		run("Measure");
+		if (has_selection) {
+			roiManager("select", roiManager("count") - 1);
+			roiManager("delete");
+			//the region should still be selected, so should still be saved in the thresholded version
+		}
 		
 		// THRESHOLD IMAGE AND CLEAN UP FOR DOWNSTREAM PROCESSING IN ANALYZESKELETON
 		run("8-bit");
@@ -50,12 +57,13 @@ function thresholding(input, output, filename) {
 		// replaces a bright or dark outlier pixel by the median pixels in the surrounding area if it deviates by more than the threshold value specified
 		// here, bright outliers are targeted with pixel radius 2 and threshold of 50
 		run("Remove Outliers...", "radius=2 threshold=50 which=Bright");
+		
 		// save thresholded + cleaned image -- this is the input for skeleton analysis below
-		saveAs("Tiff", output + filename + "_thresholded");
+		saveAs("Tiff", output + File.getNameWithoutExtension(input + filename) + "_thresholded");
 		
 		close(filename);
 
-		close(filename + "_thresholded.tif");
+		close(File.getNameWithoutExtension(input + filename) + "_thresholded.tif");
 	}
 
 
@@ -63,6 +71,7 @@ function thresholding(input, output, filename) {
 //Generating Single Cell ROIs from thresholded images
 function cellROI(input, output, filename, min, max){
 		close("Results");
+		close("ROI Manager");
 		print(input + filename);
     	open(input + filename);
     	
@@ -78,23 +87,27 @@ function cellROI(input, output, filename, min, max){
 			Overlay.remove;
 			run("Select None");
 		}
+		
 		//if there is not yet an overlay, make one
 		if (Overlay.size < 1) {
+			Overlay.remove;
+			has_selection = selectionType();
 			//either of the current selection or the entire brain if there is no current selection
-			if (selectionType() == -1) {
+			if (has_selection == -1) {
 				run("Select All");
-				roiManager("add");
-				roiManager("select", roiManager("count") - 1);
-				roiManager("rename", "full_brain");
+				setSelectionName("full_brain");
+				Overlay.addSelection;
+				run("Select None");
+			} else {
+				Overlay.addSelection;
+				run("Select None");
 			}
-			Overlay.add;
-		} 
-		roiManager("reset");
+		}
 		//retrieve how many regions we have to go through
 		region_number = Overlay.size;
 		
 		//print output if something went wrong
-		response = filename + ":";
+		response = "";
 		Table.create("All_results");
 
 		for (current_region = 0; current_region < region_number; current_region++) {
@@ -105,11 +118,14 @@ function cellROI(input, output, filename, min, max){
 			
 			roiManager("select", current_region);
 			region = Roi.getName;
+			print("Working on region " + region + ". " + (current_region + 1) + " / " + region_number);
+			//this only duplicates the specific region
 			run("Duplicate...", "title=region");
 			
 			selectWindow(mainTitle_safe);
 			run("From ROI Manager");
 			roiManager("reset");
+			run("Select None");
 			
 			selectWindow("region");
 		    run("Select None");
@@ -152,7 +168,7 @@ function cellROI(input, output, filename, min, max){
 			}
 			//after the check of nResults > 0
 			close("region");
-			roiManager("reset");
+			close("ROI Manager");
 		}
 		//after processing all regions
 		close(mainTitle_safe);
@@ -192,8 +208,11 @@ function cellROI(input, output, filename, min, max){
 			
 			
 		}
-		saveAs("results", output + mainTitle + ".csv");
-		close(mainTitle + ".csv");
+		saveAs("results", output + File.getNameWithoutExtension(input + filename) + ".csv");
+		close(File.getNameWithoutExtension(input + filename) + ".csv");
+		if (response != "") {
+			response = filename + ":" + response; 
+		}
 		return response;
     }
 
@@ -653,10 +672,12 @@ var autolocal_radius = 0;
 			Dialog.addMessage("Select range of images you'd like to analyze");
 			Dialog.addNumber("Start at Image:", 1);
 			Dialog.addNumber("Stop at Image:", thresholded_input.length);
+			Dialog.addCheckbox("Do your input images have ROIs traced?", true);
 			Dialog.show();
 					
 			startAt=Dialog.getNumber();
 			endAt=Dialog.getNumber();
+			roichoice=Dialog.getCheckbox();
 			
 
 	    	if (use_directory_creation) {
@@ -677,14 +698,14 @@ var autolocal_radius = 0;
 		skipped_files = newArray();
 		for (i=(startAt-1); i<(endAt); i++){
 			
-			print("Measuring, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
+			print("Measuring: " + thresholded_input[i] + "\nImage " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
 			
 			skipping = cellROI(thresholded_dir, data_output, thresholded_input[i], area_min, area_max);
 			skipped_files = Array.concat(skipped_files, skipping);
 			run("Collect Garbage");
 		}
 		
-		
+		skipped_files = Array.deleteValue(skipped_files, "");
 		setBatchMode(false);
 		
 		
