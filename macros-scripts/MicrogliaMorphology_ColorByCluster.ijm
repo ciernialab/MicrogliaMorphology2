@@ -168,6 +168,7 @@ skipped_files = newArray();
 			
 				roiManager("select", current_region);
 				region = Roi.getName;
+				print("Working on region: " + region);
 				run("Duplicate...", "title=region");
 				
 				selectWindow(threshold_file);
