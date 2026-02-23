@@ -172,7 +172,7 @@ skipped_files = newArray();
 				
 				selectWindow(threshold_file);
 				run("From ROI Manager");
-				
+				roiManager("reset");
 				selectWindow("region");
 		   		run("Select None");
 				run("Analyze Particles...", "pixel add");
