@@ -123,7 +123,7 @@ function cellROI(input, output, filename, min, max){
 			area = Table.getColumn("Area");
 			label = Table.getColumn("Label");
 			close("Results");
-			run("Set Measurements...", "area mean standard modal min centroid center perimeter bounding fit shape feret's integrated median skewness kurtosis area_fraction stack display redirect=None decimal=9");
+			run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
 			
 			Table.create("All_results");
 			for (i = 0; i < area.length; i++) {
@@ -151,6 +151,21 @@ function cellROI(input, output, filename, min, max){
 			close(mainTitle_safe);
 			roiManager("reset");
 			selectWindow("All_results");
+			//deleting unneccessary results
+			Table.deleteColumn("Angle");
+			Table.deleteColumn("Slice");
+			Table.deleteColumn("FeretX");
+			Table.deleteColumn("FeretY");
+			Table.deleteColumn("FeretAngle");
+			Table.deleteColumn("AR");
+			Table.deleteColumn("hull_Label");
+			Table.deleteColumn("hull_Angle");
+			Table.deleteColumn("hull_Slice");
+			Table.deleteColumn("hull_FeretX");
+			Table.deleteColumn("hull_FeretY");
+			Table.deleteColumn("hull_FeretAngle");
+			Table.deleteColumn("hull_AR");
+			
 			saveAs("results", output + mainTitle + ".csv");
 			close(mainTitle + ".csv");
 			close("All_results");
