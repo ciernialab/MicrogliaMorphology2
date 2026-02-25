@@ -139,8 +139,8 @@ function cellROI(input, output, filename, min, max){
 				area = Table.getColumn("Area");
 				label = Table.getColumn("Label");
 				close("Results");
-				run("Set Measurements...", "area mean standard modal min centroid center perimeter bounding fit shape feret's integrated median skewness kurtosis area_fraction stack display redirect=None decimal=9");
-				
+				run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
+
 				for (i = 0; i < area.length; i++) {
 			
 					if((min < area[i]) && (area[i] < max)){
@@ -180,12 +180,7 @@ function cellROI(input, output, filename, min, max){
 			Table.set("Label", 0, filename);
 			Table.set("Image", 0, filename);
 			Table.set("Region", 0, "NA");
-			headings = split(Table.allHeadings, "\t");
-			headings = Array.deleteValue(headings, " ");
-			headings = Array.deleteValue(headings, "Ch");
-			headings = Array.deleteValue(headings, "MinThr");
-			headings = Array.deleteValue(headings, "MaxThr");
-
+			headings = newArray("Label", "Area", "Perim.", "Major", "Minor", "Circ.", "Feret", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
 			
 			for (i = 0; i < headings.length; i++) {
 				Table.set(headings[i], 0, "NA");
@@ -208,12 +203,28 @@ function cellROI(input, output, filename, min, max){
 			
 			
 		}
+		selectWindow("All_results");
+		//deleting unneccessary results
+		Table.deleteColumn("Angle");
+		Table.deleteColumn("Slice");
+		Table.deleteColumn("FeretX");
+		Table.deleteColumn("FeretY");
+		Table.deleteColumn("FeretAngle");
+		Table.deleteColumn("AR");
+		Table.deleteColumn("hull_Label");
+		Table.deleteColumn("hull_Angle");
+		Table.deleteColumn("hull_Slice");
+		Table.deleteColumn("hull_FeretX");
+		Table.deleteColumn("hull_FeretY");
+		Table.deleteColumn("hull_FeretAngle");
+		Table.deleteColumn("hull_AR");
 		saveAs("results", output + File.getNameWithoutExtension(input + filename) + ".csv");
 		close(File.getNameWithoutExtension(input + filename) + ".csv");
 		if (response != "") {
 			response = filename + ":" + response; 
 		}
 		return response;
+
     }
 
 
