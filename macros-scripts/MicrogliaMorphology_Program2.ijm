@@ -174,7 +174,7 @@ function cellROI(input, output, filename, min, max){
 			close(filename);
 			roiManager("reset");
 			print("A problem occured in image " +  filename + ".");
-			return(filename);
+			return filename;
 		}
     }
 
@@ -382,7 +382,8 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 		use_directory_creation = Dialog.getCheckbox();
 		skip_thresholding = Dialog.getCheckbox();
 		
-		
+
+		
 // STEP 1b. Determining single cell area range using test image
 		if (use_test_image == true) {
 			//use file browser to choose test image
@@ -687,3 +688,4 @@ thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGre
 		close("ROI Manager");
 		
 	    print("done!");
+
