@@ -16,7 +16,8 @@ function findRoiWithName(roiName) {
 		if (matches(substring(rName, 0, 5), substring(roiName, 0, 5))) { 
 			return i; 
 		} 
-	} 
+	}
+	return 0; //fallback so does not break - is not perfect
 } 
 
 // Function to open the file
@@ -113,7 +114,7 @@ skipped_files = newArray();
 	Cluster8 = Dialog.getString();
 	Cluster9 = Dialog.getString();
 	Cluster10 = Dialog.getString();
-	clusters = newArray(Cluster1, Cluster2, Cluster3, Cluster4, Cluster5, Cluster6, Cluster7, Cluster8, Cluster9, Cluster10);
+	cluster_colors = newArray(Cluster1, Cluster2, Cluster3, Cluster4, Cluster5, Cluster6, Cluster7, Cluster8, Cluster9, Cluster10);
 	
 	// loop through original images
 	for(i=0; i<ColorByCluster_originalimages_count; i++){
@@ -133,6 +134,7 @@ skipped_files = newArray();
 			
 			openFile(ColorByCluster_clusters_dir + cluster_file);
 			selectWindow(cluster_file);
+			remove_regions = false;
 			if (Table.getString("Region", 1) == "full_brain") {
 				remove_regions = true;
 			}
@@ -159,30 +161,31 @@ skipped_files = newArray();
 			}
 			//retrieve how many regions we have to go through
 			region_number = Overlay.size;
+			
+			open(ColorByCluster_originalimages_dir + ColorByCluster_originalimage);
+			Overlay.remove;
 			for (current_region = 0; current_region < region_number; current_region++) {
 				
 				
 				selectWindow(threshold_file);
+		   		run("Select None");
+				run("Duplicate...", "title=region");
 				run("To ROI Manager");
 				//Overlay.remove;//do not have to do this if the overlay just stays like this the entire time
 			
 				roiManager("select", current_region);
 				region = Roi.getName;
+				setBackgroundColor(0,0,0);
+				run("Clear Outside");
 				print("Working on region: " + region);
-				run("Duplicate...", "title=region");
-				
-				selectWindow(threshold_file);
-				run("From ROI Manager");
-				roiManager("reset");
+		   		run("Select None");
+		   		roiManager("reset");
 				selectWindow("region");
 		   		run("Select None");
 				run("Analyze Particles...", "pixel add");
 				//close(threshold_file);
-				
-				// open original .tiff file and print file name
-				open(ColorByCluster_originalimages_dir + ColorByCluster_originalimage);
-				
-				
+				close("region");
+				// open original .tiff file
 				
 				roiManager("Show All without labels");
 				roiManager("Set Color", "black");
@@ -195,28 +198,45 @@ skipped_files = newArray();
 					selectWindow(cluster_file);
 					region_in_table = Table.getString("Region", n);
 					if (region_in_table == region) {
-						cluster = Table.get("Cluster",n);
+						cluster = Table.getString("Cluster",n);
+						cluster = parseInt(cluster);
+						print("cluster: " + cluster);
 						if (cluster > 0 && cluster < 11) {
 							label2 = Table.getString("ID",n);
 							roi_idx = findRoiWithName(label2);
+							print("roi id: " + roi_idx);
+							print("color: " + cluster_colors[cluster - 1]);
+							//setColor(cluster_colors[cluster-1]);
 							selectWindow(ColorByCluster_originalimage);
-							roiManager("Select", roi_idx);
-							
-							Roi.setFillColor(clusters[cluster-1]);	
+							roiManager("select", roi_idx);
+							Roi.setFillColor(cluster_colors[cluster - 1]);
+							roiManager("update");
 						}	
 					}
 				}
 				
-				run("Flatten");
+				//run("Flatten");
 				
-				// save into ColorByCluster images
-				saveAs("Tiff", ColorByCluster_output + ColorByCluster_originalimage + "_ColorByCluster_" + region);
-				// close everything
-				close(ColorByCluster_originalimage + "_ColorByCluster_" + region + ".tif");
-				close(cluster_file);
-				close(ColorByCluster_originalimage);
+				selectWindow(ColorByCluster_originalimage);
+				run("From ROI Manager");
 				close("ROI Manager");
 			}
+			Array.print(cluster_colors);
+			selectWindow(ColorByCluster_originalimage);
+			// save into ColorByCluster images
+			run("Flatten");
+			flattened_image = getTitle();
+			selectWindow(threshold_file);
+			run("To ROI Manager");
+			selectWindow(flattened_image);
+			roiManager("show all");
+			saveAs("Tiff", ColorByCluster_output + ColorByCluster_originalimage + "_ColorByCluster.tif");
+			// close everything
+			close(ColorByCluster_originalimage + "_ColorByCluster.tif");
+			close(cluster_file);
+			close(ColorByCluster_originalimage);
+			close(threshold_file);
+			close("ROI Manager");
 		} else {
 			skipped_files = Array.concat(skipped_files , ColorByCluster_originalimages[i]);
 		}
