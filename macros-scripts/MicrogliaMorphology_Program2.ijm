@@ -392,7 +392,8 @@ thresholding_approach = newArray("Auto thresholding", "Auto local thresholding")
 thresholding_parameters = newArray("Huang","Huang2","Intermodes","IsoData","Li","MaxEntropy","Mean","MinError(I)","Minimum","Moments","Otsu","Percentile","RenyiEntropy","Shanbhag","Triangle","Yen")
 thresholding_parameters2 = newArray("Bernsen","Contrast","Mean","Median","MidGrey","Niblack","Otsu","Phansalkar","Sauvola");
 
-var auto_or_autolocal = "";
+
+var auto_or_autolocal = "";
 var auto_method = "";
 var autolocal_method = "";
 var autolocal_radius = 0;
@@ -435,7 +436,8 @@ var autolocal_radius = 0;
 		use_directory_creation = Dialog.getCheckbox();
 		skip_thresholding = Dialog.getCheckbox();
 		
-		
+
+		
 // STEP 1b. Determining single cell area range using test image
 		if (use_test_image == true) {
 			//use file browser to choose test image
@@ -725,3 +727,4 @@ var autolocal_radius = 0;
 		close("ROI Manager");
 		
 	    print("done!");
+
