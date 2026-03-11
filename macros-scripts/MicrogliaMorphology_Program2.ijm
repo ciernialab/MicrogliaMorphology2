@@ -256,6 +256,8 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 		Table.deleteColumn("hull_Label");
 		if (do_channel_quantification) {
 			Table.deleteColumn("hull_Mean");
+			Table.deleteColumn("hull_Min");
+			Table.deleteColumn("hull_Max");
 			Table.deleteColumn("RawIntDen");
 			Table.deleteColumn("hull_RawIntDen");
 			
