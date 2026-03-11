@@ -76,7 +76,7 @@ Please watch this video before proceeding to the section below, which contains d
 <details>
 <summary>
    
-### 1. Determine dataset-specific parameters to use in Steps 3-4
+### 1. Determine dataset-specific parameters to use in Steps 4-5
 </summary>
 
 #### Determine thresholding parameters using BioVoxxel Toolbox plugin (user input required)
@@ -128,7 +128,7 @@ There are three types settings to specify:
 #### Thresholding
 </summary>
 
-These are the parameters determined in [Step 1](https://github.com/ciernialab/MicrogliaMorphology2/edit/main/README.md#1-determine-dataset-specific-parameters-to-use-in-steps-3-4).
+These are the parameters determined in [Step 1](https://github.com/ciernialab/MicrogliaMorphology2/edit/main/README.md#1-determine-dataset-specific-parameters-to-use-in-steps-4-5).
 
 Which type of Thresholding will you use, global or local? Which thresholding algorithm will it be? If you are choosing local: which radius counts as local?
 </details>
@@ -266,3 +266,4 @@ ColorByCluster allows you to color the microglia cells in the original immunoflu
 
 If you are running individual images: After you finish running ColorByCluster on your image and saved your final outputs, make sure to **close all ImageJ windows** before proceeding to the next image!
 </details>
+
