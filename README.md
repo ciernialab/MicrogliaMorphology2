@@ -189,7 +189,7 @@ MicrogliaMorphology will first prompt you to specify the thresholding parameters
 
 
 
-Determine single-cell area range (user input required)
+Determine single-cell area range (user input required). Either uses an example image, or skip the use of a test image and enter the area range manually.
 
 </summary>
 
@@ -208,13 +208,22 @@ In this step, you are determining the cutoff ranges (min and max) for what is co
 
 Alternatively, if you already know your cutoff ranges, you can skip this step and enter them manually by unselecting "Use test image to find Microglia areas". 
 
+![](./images/size_selection.png)
+
 After you are done determining the lower and upper bounds for cell area, MicrogliaMorphology will provide a summary of the final thresholding and cell area parameters that will be applied in steps 2-4. You will see a window like the one below pop up before moving on to step 2. Additionally, in your home directory, you will find a file called FinalDatasetParameters.txt which notes all of this information for your records.
 
 ![](./images/Example_FinalAreaThresholdParameters.png)
 
 </details>
 
-
+Next, specify the settings for you input files:
+- Which range of files do you want to analyze? Files are sorted in descending order, so "Test_image_1.tif", "Test_image_9.tif", and "Test_image_10.tif" would be sorted as "Test_image_1.tif", "Test_image_10.tif", and "Test_image_9.tif"
+- When working with multi-channel images, which channel contains the microglia-specific signal? If there is only one channel, leave it at "1". The channel order has to be consistent between all input images.
+- Do you want to quantify the intensity of another channel within the microglia? This can be used to differentiate microglia morphology between stain positive an stain negative cells.
+   - Which channel - can also be the microglia-specific channel.
+   - If you chose to skip the thresholding step by inputing binarized images, you will be asked to provide the original images again, to obtain the quantification channel.
+ 
+![](./images/input_settings.png)
 
 #### Steps 2-3 will use the final parameters that you specified within the macro such that the only user input required is to follow user prompts to specify folders to read from and write output to. You can consult the video of how to use MicrogliaMorphology at the start of this document for more information.
 
@@ -272,6 +281,7 @@ ColorByCluster allows you to color the microglia cells in the original immunoflu
 
 
 If you are running individual images: After you finish running ColorByCluster on your image and saved your final outputs, make sure to **close all ImageJ windows** before proceeding to the next image!
+
 
 
 
