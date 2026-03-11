@@ -165,7 +165,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 				label = Table.getColumn("Label");
 				close("Results");
 				if (do_channel_quantification) {
-					run("Set Measurements...", "area mean perimeter fit shape feret's stack display redirect=None decimal=9");
+					run("Set Measurements...", "area mean min perimeter fit shape feret's integrated stack display redirect=None decimal=9");
 				} else {
 					run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
 				}
@@ -219,7 +219,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 			Table.set("Image", 0, filename);
 			Table.set("Region", 0, "NA");
 			if (do_channel_quantification) {
-				headings = newArray("Label", "Area", "Mean", "Perim.", "Major", "Minor", "Circ.", "Feret", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
+				headings = newArray("Label", "Area", "Mean", "Min", "Max", "Perim.", "Major", "Minor", "Circ.", "Feret", "IntDen", "RawIntDen", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
 			} else {
 				headings = newArray("Label", "Area", "Perim.", "Major", "Minor", "Circ.", "Feret", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
 			}
@@ -256,6 +256,9 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 		Table.deleteColumn("hull_Label");
 		if (do_channel_quantification) {
 			Table.deleteColumn("hull_Mean");
+			Table.deleteColumn("RawIntDen");
+			Table.deleteColumn("hull_RawIntDen");
+			
 		}
 		Table.deleteColumn("hull_Angle");
 		Table.deleteColumn("hull_Slice");
