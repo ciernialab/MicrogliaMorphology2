@@ -5,12 +5,12 @@
 
 #### *An updated version of the ImageJ macro for microglia morphology analysis*
 
-This is a modified version of [MicrogliaMorphology](https://github.com/ciernialab/MicrogliaMorphology) that works better with big datasets, that crashed the original pipeline under certain circumstances. The output measurements are slightly different, so if you want to replicate the original data, please refer to the original github. 
+This is a modified version of [MicrogliaMorphology](https://github.com/ciernialab/MicrogliaMorphology) with several changes: It is more stable when working with big datasets, that crashed the original pipeline under certain circumstances. This version can run on multiple regions per image, and quantify channel intensity within the microglia. The output measurements are slightly different, so if you want to replicate the original data, please refer to the original github. 
 The former FracLac analysis had a memory leak, leading to issues when analyzing more than circa 20000 cells. Now we are not using FracLac anymore, and not creating individual image files for every cell, leading to a decreased file load. 
 
 
 
-**Created**: 21 January, 2026 **Last updated**: 22 January, 2026
+**Created**: 21 January, 2026 **Last updated**: 11 March, 2026
 
 
 
@@ -95,7 +95,7 @@ MicrogliaMorphology is a user-friendly ImageJ macro that offers asemi-automated 
 **Image preparation prior to MicrogliaMorphology**: When generating your single-channel input .tiff images which contain the microglia you want to analyze, include any important metadata tied to that image in its title, with each descriptor separated by an underscore. For example: “CohortName_AnimalID_Condition_Sex_BrainRegion.tiff” Formatting this way is very important for compatibility with [MicrogliaMorphologyR](https://github.com/ciernialab/MicrogliaMorphologyR) functions.
 
 
-**Integration with ROIMAPer ImageJ Plugin** (or any other method of tracing Regions of Interest prior to using MicrogliaMorphology): If you are interested in a specific region of interest (ROI) within your images, you can trace these in ImageJ prior to running MicrogliaMorphology to characterize the microglia within those ROIs [ROIMAPer](https://github.com/ciernialab/ROIMAPer) is one ImageJ tool that you can use to align your brain images to the [Allen Brain Institute reference mouse brain atlas](https://mouse.brain-map.org/static/atlas) You can also manually trace any ROIs on your images. Just make sure to save your .tif files so that they include the ROIs (example below), and click the check box next to any questions such as **“Do your input images have ROIs traced?”** that pop up in the MicrogliaMorphology prompts. This will ensure that only the part of the image that is contained within the ROI will be analyzed.
+**Integration with ROIMAPer ImageJ Plugin** (or any other method of tracing Regions of Interest prior to using MicrogliaMorphology): If you are interested in a specific region of interest (ROI) within your images, you can trace these in ImageJ prior to running MicrogliaMorphology to characterize the microglia within those ROIs. [ROIMAPer](https://github.com/ciernialab/ROIMAPer) is one ImageJ tool that you can use to align your brain images to the [Allen Brain Institute reference mouse brain atlas](https://mouse.brain-map.org/static/atlas). You can also manually trace any ROIs on your images. Just make sure to name the ROIs, save your .tif files so that they include the ROIs (example below), and click the check box next to any questions such as **“Do your input images have ROIs traced?”** that pop up in the MicrogliaMorphology prompts. This will ensure that only the part of the image that is contained within the ROI will be analyzed.
 
 ![](./images/ExampleROI.png)
 
@@ -272,6 +272,7 @@ ColorByCluster allows you to color the microglia cells in the original immunoflu
 
 
 If you are running individual images: After you finish running ColorByCluster on your image and saved your final outputs, make sure to **close all ImageJ windows** before proceeding to the next image!
+
 
 
 
