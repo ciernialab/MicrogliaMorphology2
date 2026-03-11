@@ -5,9 +5,18 @@
 // FUNCTIONS
 
 // Auto thresholding 
-function thresholding(input, output, filename) {
+function thresholding(input, output, filename, microglia_channel) {
 		print(input + filename);
 		open(input + filename);
+		getDimensions(width, height, channels, slices, frames);
+		
+		for (i = channels; i > 0; i--) {
+			Stack.setChannel(i);
+			if (i != microglia_channel) {
+				run("Delete Slice", "delete=channel");
+			}
+		}
+
 		
 		// MEASURE AREA
 		run("Set Measurements...", "area display redirect=None decimal=9");
@@ -69,7 +78,7 @@ function thresholding(input, output, filename) {
 
 //Generating Single Cell ROIs from thresholded images
 //Generating Single Cell ROIs from thresholded images
-function cellROI(input, output, filename, min, max){
+function cellROI(input, output, filename, min, max, do_channel_quantification, original_file_path, quantification_channel){
 		close("Results");
 		close("ROI Manager");
 		print(input + filename);
@@ -109,7 +118,21 @@ function cellROI(input, output, filename, min, max){
 		//print output if something went wrong
 		response = "";
 		Table.create("All_results");
-
+		
+		if(do_channel_quantification) {
+			open(original_file_path);
+			getDimensions(width, height, channels, slices, frames);
+		
+			for (i = channels; i > 0; i--) {
+				Stack.setChannel(i);
+				if (i != quantification_channel) {
+					run("Delete Slice", "delete=channel");
+				}
+			}
+			original_image = getTitle();
+			run("8-bit");
+		}
+		
 		for (current_region = 0; current_region < region_number; current_region++) {
 			
 			selectWindow(mainTitle_safe);
@@ -120,8 +143,10 @@ function cellROI(input, output, filename, min, max){
 			region = Roi.getName;
 			print("Working on region " + region + ". " + (current_region + 1) + " / " + region_number);
 			//this only duplicates the specific region
-			run("Duplicate...", "title=region");
-			
+			run("Duplicate...", "title=region ignore");
+			setBackgroundColor(0, 0, 0);
+			run("Clear Outside");
+
 			selectWindow(mainTitle_safe);
 			run("From ROI Manager");
 			roiManager("reset");
@@ -139,7 +164,12 @@ function cellROI(input, output, filename, min, max){
 				area = Table.getColumn("Area");
 				label = Table.getColumn("Label");
 				close("Results");
-				run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
+				if (do_channel_quantification) {
+					run("Set Measurements...", "area mean min perimeter fit shape feret's integrated stack display redirect=None decimal=9");
+				} else {
+					run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
+				}
+
 
 				for (i = 0; i < area.length; i++) {
 			
@@ -147,6 +177,10 @@ function cellROI(input, output, filename, min, max){
 						selectWindow("region");
 						label_temp = label[i];
 						label_temp = label_temp.replace(':','_');
+						
+						if(do_channel_quantification) {
+							selectWindow(original_image);
+						}
 						roiManager("Select", i);
 						run("Duplicate...", "title=" + label_temp);
 						
@@ -174,13 +208,21 @@ function cellROI(input, output, filename, min, max){
 		close(mainTitle_safe);
 		selectWindow("All_results");
 		
+		if(do_channel_quantification) {				
+			close(original_image);
+		}
+		
 		//if no cells were detected still create the table headings
 		if (Table.size == 0) {
 			selectWindow("All_results");
 			Table.set("Label", 0, filename);
 			Table.set("Image", 0, filename);
 			Table.set("Region", 0, "NA");
-			headings = newArray("Label", "Area", "Perim.", "Major", "Minor", "Circ.", "Feret", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
+			if (do_channel_quantification) {
+				headings = newArray("Label", "Area", "Mean", "Min", "Max", "Perim.", "Major", "Minor", "Circ.", "Feret", "IntDen", "RawIntDen", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
+			} else {
+				headings = newArray("Label", "Area", "Perim.", "Major", "Minor", "Circ.", "Feret", "MinFeret", "Round", "Solidity", "Angle", "Slice", "FeretX", "FeretY", "FeretAngle", "AR");
+			}
 			
 			for (i = 0; i < headings.length; i++) {
 				Table.set(headings[i], 0, "NA");
@@ -212,6 +254,12 @@ function cellROI(input, output, filename, min, max){
 		Table.deleteColumn("FeretAngle");
 		Table.deleteColumn("AR");
 		Table.deleteColumn("hull_Label");
+		if (do_channel_quantification) {
+			Table.deleteColumn("hull_Mean");
+			Table.deleteColumn("RawIntDen");
+			Table.deleteColumn("hull_RawIntDen");
+			
+		}
 		Table.deleteColumn("hull_Angle");
 		Table.deleteColumn("hull_Slice");
 		Table.deleteColumn("hull_FeretX");
@@ -233,6 +281,7 @@ function analyze(name, image, region) {
 	setThreshold(1, 255);
 	
 	run("To Selection");
+	
 	run("Measure");
 	
 	selectWindow("Results");
@@ -639,19 +688,24 @@ var autolocal_radius = 0;
 			Dialog.addNumber("Start at Image:", 1);
 			Dialog.addNumber("Stop at Image:", autocount);
 			Dialog.addCheckbox("Do your input images have ROIs traced?", true);
+			Dialog.addNumber("If your images have multiple channels, which channel has the microglia signal?", 1, 0, 3, "");
+			Dialog.addCheckbox("Do you want to quantify a fluorescence signal in the microglia?", false);
+			Dialog.addNumber("If yes, in which channel?", 1, 0, 3, "");
 			Dialog.show();
 					
 			startAt=Dialog.getNumber();
 			endAt=Dialog.getNumber();
 			roichoice=Dialog.getCheckbox();
+			microglia_channel = Dialog.getNumber();
+			do_channel_quantification = Dialog.getCheckbox();
+			quantification_channel = Dialog.getNumber();
 			
 			setBatchMode(true);
 			
-				
 			
 			for (i=(startAt-1); i<(endAt); i++){
 				print("Thresholding in progress, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
-				thresholding(subregion_dir, thresholded_dir, subregion_input[i]);
+				thresholding(subregion_dir, thresholded_dir, subregion_input[i], microglia_channel);
 			}
 			
 			// SAVE AREA MEASURES
@@ -686,11 +740,21 @@ var autolocal_radius = 0;
 			Dialog.addNumber("Start at Image:", 1);
 			Dialog.addNumber("Stop at Image:", thresholded_input.length);
 			Dialog.addCheckbox("Do your input images have ROIs traced?", true);
+			Dialog.addCheckbox("Do you want to quantify a fluorescence signal in the microglia?", false);
+			Dialog.addNumber("If yes, in which channel?", 1, 0, 3, "");
 			Dialog.show();
 					
 			startAt=Dialog.getNumber();
 			endAt=Dialog.getNumber();
 			roichoice=Dialog.getCheckbox();
+			do_channel_quantification = Dialog.getCheckbox();
+			quantification_channel = Dialog.getNumber();
+			
+			if (do_channel_quantification) {
+				subregion_dir = getDirectory("Which folder contains the original fluorescence images?");
+				subregion_input = getFileList(subregion_dir);
+				subregion_input = Array.sort(subregion_input);
+			}
 			
 
 	    	if (use_directory_creation) {
@@ -713,7 +777,7 @@ var autolocal_radius = 0;
 			
 			print("Measuring: " + thresholded_input[i] + "\nImage " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
 			
-			skipping = cellROI(thresholded_dir, data_output, thresholded_input[i], area_min, area_max);
+			skipping = cellROI(thresholded_dir, data_output, thresholded_input[i], area_min, area_max, do_channel_quantification, subregion_dir + subregion_input[i], quantification_channel);
 			skipped_files = Array.concat(skipped_files, skipping);
 			run("Collect Garbage");
 		}
