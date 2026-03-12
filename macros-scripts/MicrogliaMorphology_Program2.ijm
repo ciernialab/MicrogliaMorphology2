@@ -143,7 +143,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 			region = Roi.getName;
 			print("Working on region " + region + ". " + (current_region + 1) + " / " + region_number);
 			//this only duplicates the specific region
-			run("Duplicate...", "title=region ignore");
+			run("Duplicate...", "title=region_image ignore");
 			setBackgroundColor(0, 0, 0);
 			run("Clear Outside");
 
@@ -152,7 +152,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 			roiManager("reset");
 			run("Select None");
 			
-			selectWindow("region");
+			selectWindow("region_image");
 		    run("Select None");
 			run("Set Measurements...", "area display redirect=None decimal=3");
 			
@@ -174,7 +174,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 				for (i = 0; i < area.length; i++) {
 			
 					if((min < area[i]) && (area[i] < max)){
-						selectWindow("region");
+						selectWindow("region_image");
 						label_temp = label[i];
 						label_temp = label_temp.replace(':','_');
 						
@@ -201,7 +201,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 				response = response + " " + region + ";";
 			}
 			//after the check of nResults > 0
-			close("region");
+			close("region_image");
 			close("ROI Manager");
 		}
 		//after processing all regions
@@ -756,6 +756,10 @@ var autolocal_radius = 0;
 				subregion_dir = getDirectory("Which folder contains the original fluorescence images?");
 				subregion_input = getFileList(subregion_dir);
 				subregion_input = Array.sort(subregion_input);
+			} else {
+				//make dummy variables so they can still be input to the analyze function
+				subregion_dir = "";
+				subregion_input = newArray(thresholded_input.length);
 			}
 			
 
