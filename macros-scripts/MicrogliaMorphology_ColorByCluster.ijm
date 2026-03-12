@@ -7,13 +7,11 @@
 // find ROIs by name
 // function adapted from:
 // https://forum.image.sc/t/selecting-roi-based-on-name/3809 
-function findRoiWithName(roiName) { 
-	nR = roiManager("Count"); 
+function findRoiWithName(roi_ids, roiName) { 
  
-	for (i=0; i<nR; i++) { 
-		roiManager("Select", i); 
-		rName = Roi.getName(); 
-		if (matches(substring(rName, 0, 5), substring(roiName, 0, 5))) { 
+	for (i=0; i<roi_ids.length; i++) { 
+		print("Match: " + roi_ids[i] + ";" + roiName);
+		if (matches(roi_ids[i], roiName)) {
 			return i; 
 		} 
 	}
@@ -89,6 +87,8 @@ skipped_files = newArray();
 	
 	// customize colors for up to 10 cluster labels
 	Dialog.create("MicrogliaMorphology");
+	Dialog.addMessage("If your images have multiple channels, which channel would you like to use for colouring?");
+	Dialog.addNumber("If it has only one channel, leave at 1.", 1, 0, 3, "");
 	Dialog.addMessage("In the sections below, specify what colors you want your morphological clusters to be in the image.");
 	Dialog.addMessage("You can format your color choices as HEX code (e.g., BBCC33)");
 	Dialog.addMessage("or any of the following colors: black, white, cyan, magenta, yellow, red, green, blue, and orange");
@@ -104,6 +104,7 @@ skipped_files = newArray();
 	Dialog.addString("Cluster 10:", "cyan");
 	Dialog.show();	
 	
+	colour_channel = Dialog.getNumber();
 	Cluster1 = Dialog.getString();
 	Cluster2 = Dialog.getString();
 	Cluster3 = Dialog.getString();
@@ -163,7 +164,16 @@ skipped_files = newArray();
 			region_number = Overlay.size;
 			
 			open(ColorByCluster_originalimages_dir + ColorByCluster_originalimage);
+			getDimensions(width, height, channels, slices, frames);
 			Overlay.remove;
+			//only leave one channel
+			for (channel_number = channels; channel_number > 0; channel_number--) {
+				Stack.setChannel(i);
+				if (channel_number != colour_channel) {
+					run("Delete Slice", "delete=channel");
+				}
+			}
+			
 			for (current_region = 0; current_region < region_number; current_region++) {
 				
 				
@@ -183,11 +193,26 @@ skipped_files = newArray();
 				selectWindow("region");
 		   		run("Select None");
 				run("Analyze Particles...", "pixel add");
+				//to give name information
+				run("Set Measurements...", "display redirect=None decimal=9");
+				roiManager("measure");
+				roi_names = Table.getColumn("Label");
+				roi_ids = newArray(roi_names.length);
+				close("Results");
+				// if the labels have the region name attached to it, remove that
+				for (label = 0; label < roi_names.length; label++) {
+					full_label = roi_names[label];
+					colon_index = indexOf(full_label, ":");
+					roi_ids[label] = substring(full_label, colon_index + 1);
+				}
+				
+				
 				//close(threshold_file);
 				close("region");
 				// open original .tiff file
 				
 				roiManager("Show All without labels");
+				
 				roiManager("Set Color", "black");
 				selectWindow(cluster_file);
 				nrow = Table.size();
@@ -203,7 +228,8 @@ skipped_files = newArray();
 						print("cluster: " + cluster);
 						if (cluster > 0 && cluster < 11) {
 							label2 = Table.getString("ID",n);
-							roi_idx = findRoiWithName(label2);
+							print("Label: " + label2);
+							roi_idx = findRoiWithName(roi_ids, label2);
 							print("roi id: " + roi_idx);
 							print("color: " + cluster_colors[cluster - 1]);
 							//setColor(cluster_colors[cluster-1]);
@@ -221,7 +247,6 @@ skipped_files = newArray();
 				run("From ROI Manager");
 				close("ROI Manager");
 			}
-			Array.print(cluster_colors);
 			selectWindow(ColorByCluster_originalimage);
 			// save into ColorByCluster images
 			run("Flatten");
