@@ -78,10 +78,10 @@ function thresholding(input, output, filename, microglia_channel) {
 
 //Generating Single Cell ROIs from thresholded images
 //Generating Single Cell ROIs from thresholded images
-function cellROI(input, output, filename, min, max, do_channel_quantification, original_file_path, quantification_channel){
+function cellROI(input, output, filename, min, max, do_channel_quantification, original_file_path, quantification_channel, image_number, total_image_number){
 		close("Results");
 		close("ROI Manager");
-		print(input + filename);
+		//print(input + filename);
     	open(input + filename);
     	
     	mainTitle=getTitle();
@@ -141,7 +141,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 			
 			roiManager("select", current_region);
 			region = Roi.getName;
-			print("Working on region " + region + ". " + (current_region + 1) + " / " + region_number);
+			//print("Working on region " + region + ". " + (current_region + 1) + " / " + region_number);
 			//this only duplicates the specific region
 			run("Duplicate...", "title=region_image ignore");
 			setBackgroundColor(0, 0, 0);
@@ -174,6 +174,7 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 				for (i = 0; i < area.length; i++) {
 			
 					if((min < area[i]) && (area[i] < max)){
+						print("[Progress]", "\\Update:Analyzing image " + (image_number + 1) + "/" + total_image_number + ": " + filename + "\nRegion " + (current_region + 1) + "/" + region_number + ": " + region + "\ncell: " + (i + 1) + "/" + area.length);
 						selectWindow("region_image");
 						label_temp = label[i];
 						label_temp = label_temp.replace(':','_');
@@ -189,8 +190,8 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 		    			
 		    			analyze(label_temp, filename, region);
 		    			
-						print(filename);
-						print(region + ": " + i + "/" + area.length);
+						//print(filename);
+						//print(region + ": " + i + "/" + area.length);
 						close(label_temp);
 						
 					}
@@ -704,9 +705,9 @@ var autolocal_radius = 0;
 			
 			setBatchMode(true);
 			
-			
+			run("Text Window...", "name=[Progress] width=60 height=3");
 			for (i=(startAt-1); i<(endAt); i++){
-				print("Thresholding in progress, image " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
+				print("[Progress]", "\\Update:Thresholding\nimage " + (i + 1) + "/" + endAt); //have some kind of update while in batchmode
 				thresholding(subregion_dir, thresholded_dir, subregion_input[i], microglia_channel);
 			}
 			
@@ -715,6 +716,8 @@ var autolocal_radius = 0;
 			close("Results");
 			
 			print("Thresholding finished");
+			selectWindow("Progress");
+			run("Close");
 			
 			thresholded_input = getFileList(thresholded_dir);
 			thresholded_input=Array.sort(thresholded_input);
@@ -777,13 +780,12 @@ var autolocal_radius = 0;
 
 	    }
 
-		
+		run("Text Window...", "name=[Progress] width=60 height=10");
+		setLocation(10, 10);
 		skipped_files = newArray();
 		for (i=(startAt-1); i<(endAt); i++){
-			
-			print("Measuring: " + thresholded_input[i] + "\nImage " + (i + 1) + " out of " + endAt); //have some kind of update while in batchmode
-			
-			skipping = cellROI(thresholded_dir, data_output, thresholded_input[i], area_min, area_max, do_channel_quantification, subregion_dir + subregion_input[i], quantification_channel);
+			
+			skipping = cellROI(thresholded_dir, data_output, thresholded_input[i], area_min, area_max, do_channel_quantification, subregion_dir + subregion_input[i], quantification_channel, i, endAt);
 			skipped_files = Array.concat(skipped_files, skipping);
 			run("Collect Garbage");
 		}
@@ -791,10 +793,12 @@ var autolocal_radius = 0;
 		skipped_files = Array.deleteValue(skipped_files, "");
 		setBatchMode(false);
 		
+		print("[Progress]", "\\Update:Complete. See Log for errors.");
 		
 	    print("Finished analysing cells. If there were any problems with regions within an image they are listed here:\n" + String.join(skipped_files, "\n"));
 		close("*");
 		close("ROI Manager");
 		
 	    print("done!");
-
+		selectWindow("Progress");
+		run("Close");
