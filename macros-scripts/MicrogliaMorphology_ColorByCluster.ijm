@@ -230,6 +230,7 @@ skipped_files = newArray();
 							label2 = Table.getString("ID",n);
 							print("Label: " + label2);
 							roi_idx = findRoiWithName(roi_ids, label2);
+							roi_ids = Array.deleteIndex(roi_ids, roi_idx);
 							print("roi id: " + roi_idx);
 							print("color: " + cluster_colors[cluster - 1]);
 							//setColor(cluster_colors[cluster-1]);
