@@ -117,6 +117,8 @@ skipped_files = newArray();
 	Cluster10 = Dialog.getString();
 	cluster_colors = newArray(Cluster1, Cluster2, Cluster3, Cluster4, Cluster5, Cluster6, Cluster7, Cluster8, Cluster9, Cluster10);
 	
+	run("Text Window...", "name=[Progress] width=60 height=10");
+	setLocation(10, 10);
 	// loop through original images
 	for(i=0; i<ColorByCluster_originalimages_count; i++){
 		// extract out common string to search for across folders from original .tiff files
@@ -228,11 +230,12 @@ skipped_files = newArray();
 						print("cluster: " + cluster);
 						if (cluster > 0 && cluster < 11) {
 							label2 = Table.getString("ID",n);
-							print("Label: " + label2);
+							print("[Progress]", "\\Update:Analyzing image " + (i + 1) + "/" + ColorByCluster_originalimages_count + ": " + ColorByCluster_originalimage + "\nRegion " + (current_region + 1) + "/" + region_number + ": " + region + "\ncell: " + (n + 1) + "/" + nrow);
+						
 							roi_idx = findRoiWithName(roi_ids, label2);
 							roi_ids = Array.deleteIndex(roi_ids, roi_idx);
 							print("roi id: " + roi_idx);
-							print("color: " + cluster_colors[cluster - 1]);
+							
 							//setColor(cluster_colors[cluster-1]);
 							selectWindow(ColorByCluster_originalimage);
 							roiManager("select", roi_idx);
