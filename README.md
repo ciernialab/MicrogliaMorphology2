@@ -166,7 +166,7 @@ If you are using original images, leave the "Is your input already binarized" ta
 In case you already have performed thresholding with this dataset, you can input those images instead.
 
 The output folders "ThresholdedImages" and "MeasurementOutputs" can be automatically created. 
-Otherwise, you will be asked to choose two output folders to save the thresholded outputs and the single-cell measurements too. 
+Otherwise, you will be asked to choose two output folders to save the thresholded outputs and the microglia measurements too. 
 These folders should be empty.
 
 Next, specify the settings for you input files:
@@ -240,13 +240,18 @@ An output from the MicrogliaMorphologyR script will provide color information to
 
 </summary>
 
-ColorByCluster allows you to color the microglia cells in the original immunofluorescent .tiff images by their cluster identifications. This macro is meant to be complimentary to the output generated using MicrogliaMorphologyR (see [ColorByCluster section](https://github.com/ciernialab/MicrogliaMorphologyR#colorbycluster) in the MicrogliaMorphologyR Github repo). The ColorByCluster feature allows you to visually validate morphological clusters and gain insight into their spatial distribution in the brain. This macro colors microglia in one image of interest at a time, or batch processes a group of images. To run this macro, you will need the following:
+ColorByCluster allows you to color the microglia cells in the original immunofluorescent .tiff images by their cluster identifications. 
+This macro is meant to be complimentary to the output generated using MicrogliaMorphologyR (see [ColorByCluster section](https://github.com/ciernialab/MicrogliaMorphologyR#colorbycluster) in the MicrogliaMorphologyR Github repo). 
+The ColorByCluster feature allows you to visually validate morphological clusters and gain insight into their spatial distribution in the brain. 
+This macro colors microglia in one image of interest at a time, or batch processes a group of images. To run this macro, you will need the following:
 
 - Original immunofluorescent .tiff image(s) that was input into MicrogliaMorphology
 
 - Thresholded .tiff image(s) that was output by MicrogliaMorphology
+   - Named with the original image name as a starting string (does not need to include the .tif file extension).
 
 - ColorByCluster labels .csv file(s) generated using [MicrogliaMorphologyR](https://github.com/ciernialab/MicrogliaMorphologyR#colorbycluster).
+   - Named with the corresponding name of the original image as a starting string (does not need to include the .tif file extension)
    - To work successfully, the file should look like this (a column with an empty first row and ascending numbers after that; a column named "Cluster"; a column named "ID" with content matching the single-cell ROI labels; and a column named "Region" with names matching the analyzed regions or "full_brain" if no regions were provided:
 
 |   | Cluster	| ID	| Region |
@@ -261,10 +266,8 @@ ColorByCluster allows you to color the microglia cells in the original immunoflu
 | 8 | 2 | 0004-0290 | full_brain |
 
 
+ColorByCluster requires all files to have the same starting string (so ideally the name of the original image).
 
-- For batch processing: new folder to write final ColorBycluster images to
-
-If you are running individual images: After you finish running ColorByCluster on your image and saved your final outputs, make sure to **close all ImageJ windows** before proceeding to the next image!
 </details>
 
 
