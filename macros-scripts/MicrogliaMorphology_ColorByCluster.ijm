@@ -206,7 +206,11 @@ cluster_colors = newArray(Cluster1, Cluster2, Cluster3, Cluster4, Cluster5, Clus
 				for (label = 0; label < roi_names.length; label++) {
 					full_label = roi_names[label];
 					colon_index = indexOf(full_label, ":");
-					roi_ids[label] = substring(full_label, colon_index + 1);
+					if (colon_index >= 0) {
+						roi_ids[label] = substring(full_label, colon_index + 1);
+					} else {
+						roi_ids[label] = full_label;
+					}
 				}
 				
 				
