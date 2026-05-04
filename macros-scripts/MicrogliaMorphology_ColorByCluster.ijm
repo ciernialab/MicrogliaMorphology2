@@ -10,7 +10,7 @@
 function findRoiWithName(roi_ids, roiName) { 
  
 	for (i=0; i<roi_ids.length; i++) { 
-		print("Match: " + roi_ids[i] + ";" + roiName);
+		//print("Match: " + roi_ids[i] + ";" + roiName);
 		if (matches(roi_ids[i], roiName)) {
 			return i; 
 		} 
@@ -115,7 +115,8 @@ skipped_files = newArray();
 	Cluster8 = Dialog.getString();
 	Cluster9 = Dialog.getString();
 	Cluster10 = Dialog.getString();
-	cluster_colors = newArray(Cluster1, Cluster2, Cluster3, Cluster4, Cluster5, Cluster6, Cluster7, Cluster8, Cluster9, Cluster10);
+	
+cluster_colors = newArray(Cluster1, Cluster2, Cluster3, Cluster4, Cluster5, Cluster6, Cluster7, Cluster8, Cluster9, Cluster10);
 	
 	run("Text Window...", "name=[Progress] width=60 height=10");
 	setLocation(10, 10);
@@ -233,7 +234,6 @@ skipped_files = newArray();
 							print("[Progress]", "\\Update:Analyzing image " + (i + 1) + "/" + ColorByCluster_originalimages_count + ": " + ColorByCluster_originalimage + "\nRegion " + (current_region + 1) + "/" + region_number + ": " + region + "\ncell: " + (n + 1) + "/" + nrow);
 						
 							roi_idx = findRoiWithName(roi_ids, label2);
-							roi_ids = Array.deleteIndex(roi_ids, roi_idx);
 							print("roi id: " + roi_idx);
 							
 							//setColor(cluster_colors[cluster-1]);
