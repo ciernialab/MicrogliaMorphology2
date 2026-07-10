@@ -145,61 +145,71 @@ function cellROI(input, output, filename, min, max, do_channel_quantification, o
 			//this only duplicates the specific region
 			run("Duplicate...", "title=region_image ignore");
 			setBackgroundColor(0, 0, 0);
-			run("Clear Outside");
-
-			selectWindow(mainTitle_safe);
-			run("From ROI Manager");
-			roiManager("reset");
-			run("Select None");
 			
-			selectWindow("region_image");
-		    run("Select None");
-			run("Set Measurements...", "area display redirect=None decimal=3");
-			
-			run("Analyze Particles...", "pixel add");
-			roiManager("Measure");	
-			
-			if (nResults > 0) {
-				selectWindow("Results");
-				area = Table.getColumn("Area");
-				label = Table.getColumn("Label");
-				close("Results");
-				if (do_channel_quantification) {
-					run("Set Measurements...", "area mean min perimeter fit shape feret's integrated stack display redirect=None decimal=9");
-				} else {
-					run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
-				}
-
-
-				for (i = 0; i < area.length; i++) {
-			
-					if((min < area[i]) && (area[i] < max)){
-						print("[Progress]", "\\Update:Analyzing image " + (image_number + 1) + "/" + total_image_number + ": " + filename + "\nRegion " + (current_region + 1) + "/" + region_number + ": " + region + "\ncell: " + (i + 1) + "/" + area.length);
-						selectWindow("region_image");
-						label_temp = label[i];
-						label_temp = label_temp.replace(':','_');
-						
-						if(do_channel_quantification) {
-							selectWindow(original_image);
-						}
-						roiManager("Select", i);
-						run("Duplicate...", "title=" + label_temp);
-						
-						setBackgroundColor(0, 0, 0);
-						run("Clear Outside");
-		    			
-		    			analyze(label_temp, filename, region);
-		    			
-						//print(filename);
-						//print(region + ": " + i + "/" + area.length);
-						close(label_temp);
-						
+			//test if the region actually still exists, in case the region lay outside the image
+			if (selectionType() != -1) {
+				run("Clear Outside");
+	
+				selectWindow(mainTitle_safe);
+				run("From ROI Manager");
+				roiManager("reset");
+				run("Select None");
+				
+				selectWindow("region_image");
+			    run("Select None");
+				run("Set Measurements...", "area display redirect=None decimal=3");
+				
+				run("Analyze Particles...", "pixel add");
+				roiManager("Measure");	
+				
+				if (nResults > 0) {
+					selectWindow("Results");
+					area = Table.getColumn("Area");
+					label = Table.getColumn("Label");
+					close("Results");
+					if (do_channel_quantification) {
+						run("Set Measurements...", "area mean min perimeter fit shape feret's integrated stack display redirect=None decimal=9");
+					} else {
+						run("Set Measurements...", "area perimeter fit shape feret's stack display redirect=None decimal=9");
 					}
+	
+	
+					for (i = 0; i < area.length; i++) {
+				
+						if((min < area[i]) && (area[i] < max)){
+							print("[Progress]", "\\Update:Analyzing image " + (image_number + 1) + "/" + total_image_number + ": " + filename + "\nRegion " + (current_region + 1) + "/" + region_number + ": " + region + "\ncell: " + (i + 1) + "/" + area.length);
+							selectWindow("region_image");
+							label_temp = label[i];
+							label_temp = label_temp.replace(':','_');
+							
+							if(do_channel_quantification) {
+								selectWindow(original_image);
+							}
+							roiManager("Select", i);
+							run("Duplicate...", "title=" + label_temp);
+							
+							setBackgroundColor(0, 0, 0);
+							run("Clear Outside");
+			    			
+			    			analyze(label_temp, filename, region);
+			    			
+							//print(filename);
+							//print(region + ": " + i + "/" + area.length);
+							close(label_temp);
+							
+						}
+					}
+				} else {
+					
+					print("No cells found in " + filename + " " + region);
+					response = response + " " + region + ";";
 				}
 			} else {
-				
-				print("No cells found in " + filename + " " + region);
-				response = response + " " + region + ";";
+				//reset the overlay when the region did not exist after all
+				selectWindow(mainTitle_safe);
+				run("From ROI Manager");
+				roiManager("reset");
+				run("Select None");
 			}
 			//after the check of nResults > 0
 			close("region_image");
