@@ -230,7 +230,7 @@ The output measures are:
 
 Available at [github.com/ciernialab/MicrogliaMorphologyR](https://github.com/ciernialab/MicrogliaMorphologyR).
 This script will the Microglia cluster into distinct states based on their morphology. 
-For the MicrogliaMorphology Pipeline 2 workflow exampl, see the [Pipeline 2 tutorial](https://ciernialab.github.io/MicrogliaMorphologyR/articles/MicrogliaMorphologyPipeline2.html).
+For the MicrogliaMorphology Pipeline 2 workflow example, see the [Pipeline 2 tutorial](https://ciernialab.github.io/MicrogliaMorphologyR/articles/MicrogliaMorphologyPipeline2.html).
 An output from the MicrogliaMorphologyR script will provide color information to color in the original microglia based on their cluster.
 
 </details>
