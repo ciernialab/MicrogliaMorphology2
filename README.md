@@ -243,7 +243,7 @@ An output from the MicrogliaMorphologyR script will provide color information to
 </summary>
 
 ColorByCluster allows you to color the microglia cells in the original immunofluorescent .tiff images by their cluster identifications. 
-This macro is meant to be complimentary to the output generated using MicrogliaMorphologyR (see [ColorByCluster section](https://github.com/ciernialab/MicrogliaMorphologyR#colorbycluster) in the MicrogliaMorphologyR Github repo). 
+This macro is meant to be complimentary to the output generated using MicrogliaMorphologyR (see [ColorByCluster section](https://ciernialab.github.io/MicrogliaMorphologyR/articles/MicrogliaMorphologyPipeline2.html) in the MicrogliaMorphologyR Github repo). 
 The ColorByCluster feature allows you to visually validate morphological clusters and gain insight into their spatial distribution in the brain. 
 This macro colors microglia in one image of interest at a time, or batch processes a group of images. To run this macro, you will need the following:
 
