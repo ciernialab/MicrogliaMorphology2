@@ -6,7 +6,7 @@ MicrogliaMorphology is a user-friendly ImageJ macro that offers asemi-automated 
 This is a modified version of [MicrogliaMorphology](https://github.com/ciernialab/MicrogliaMorphology) with several changes: It is more stable when working with big datasets, that crashed the original pipeline under certain circumstances. This version can run on multiple regions per image, and quantify channel intensity within the microglia. The output measurements are slightly different, so if you want to replicate the original data, please refer to the original github. 
 The former FracLac analysis had a memory leak, leading to issues when analyzing more than circa 20000 cells. Now we are not using FracLac anymore, and not creating individual image files for every cell, leading to a decreased file load. 
 
-**Created**: 21 January, 2026 **Last updated**: 11 March, 2026
+**Created**: 21 January, 2026 **Last updated**: 01 Oct, 2026
 
 <details>
 <summary>
@@ -230,7 +230,9 @@ The output measures are:
 
 Available at [github.com/ciernialab/MicrogliaMorphologyR](https://github.com/ciernialab/MicrogliaMorphologyR).
 This script will the Microglia cluster into distinct states based on their morphology. 
+For the MicrogliaMorphology Pipeline 2 workflow exampl, see the [Pipeline 2 tutorial](https://ciernialab.github.io/MicrogliaMorphologyR/articles/MicrogliaMorphologyPipeline2.html).
 An output from the MicrogliaMorphologyR script will provide color information to color in the original microglia based on their cluster.
+
 </details>
 
 <details>
